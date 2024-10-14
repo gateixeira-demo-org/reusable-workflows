@@ -30,6 +30,7 @@ jobs:
         with:
           distribution: ${{ inputs.distribution }}
           java-version: ${{ inputs.java-version }}
+          cache: maven
 
       # Set tag version as POM revision
       - name: Set POM revision
