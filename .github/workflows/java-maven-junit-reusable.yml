@@ -39,7 +39,7 @@ jobs:
 
       # Run Maven unit tests
       - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+        run: ./mvn -B test --file pom.xml
 
       # Report test results to GitHub
       - name: Report
