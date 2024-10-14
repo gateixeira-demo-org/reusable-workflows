@@ -1,0 +1,51 @@
+name: Java Maven Publish Package Reusable Workflow
+
+# Trigger this workflow by a caller workflow
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+      distribution:
+        required: true
+        type: string
+      java-version:
+        required: true
+        type: string
+
+# This workflow publishes a package from a Java Maven project to GitHub Packages
+jobs:
+  publish-package:
+    runs-on: ${{ fromJson(inputs.runner) }}
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ inputs.distribution }}
+          java-version: ${{ inputs.java-version }}
+
+      # Set tag version as POM revision
+      - name: Set POM revision
+        if: github.event_name == 'release'
+        run: sed -i -E 's/(<revision>).*(<\/revision>)/\1'${GITHUB_REF#refs/tags/}'\2/g' pom.xml
+
+      # Set the Maven distribution management URL
+      - name: Set Maven distribution management URL
+        run: echo dist_mgmt=${{ github.server_url }}/${{ github.repository }} | sed 's#https://#&maven.#' >> $GITHUB_ENV
+
+      # Build and publish to GitHub Packages
+      - name: Build and Publish Maven packages
+        run: ./mvnw --batch-mode deploy -DaltDeploymentRepository=github::default::${{ env.dist_mgmt }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # List contents of working directory
+      - name: List working directory
+        run: find . -path ./.git -prune  -o -print

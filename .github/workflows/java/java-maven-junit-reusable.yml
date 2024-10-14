@@ -1,0 +1,55 @@
+name: Java Maven JUnit Reusable Workflow
+
+# Trigger this workflow by a caller workflow
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+      distribution:
+        required: true
+        type: string
+      java-version:
+        required: true
+        type: string
+
+# This worfklow runs JUnit tests on a Java Maven project
+jobs:
+  junit:
+    runs-on: ${{ fromJson(inputs.runner) }}
+    
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ inputs.distribution }}
+          java-version: ${{ inputs.java-version }}
+
+      # Set tag version as POM revision
+      - name: Set POM revision
+        if: github.event_name == 'release'
+        run: sed -i -E 's/(<revision>).*(<\/revision>)/\1'${GITHUB_REF#refs/tags/}'\2/g' pom.xml
+
+      # Run Maven unit tests
+      - name: Run tests with Maven
+        run: mvn -B test --file pom.xml
+
+      # Report test results to GitHub
+      - name: Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Maven JUnit test report
+          path: target/surefire-reports/*.xml
+          reporter: java-junit
+          fail-on-error: true
+                  
+      # List contents of working directory
+      - name: List working directory
+        run: find . -path ./.git -prune  -o -print

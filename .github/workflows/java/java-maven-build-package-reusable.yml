@@ -1,0 +1,45 @@
+name: Java Maven Build Package Reusable Workflow
+
+# Trigger this workflow by a caller workflow
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+      distribution:
+        required: true
+        type: string
+      java-version:
+        required: true
+        type: string
+
+# This worfklow builds a package from a Java Maven project
+jobs:
+  build-package:
+    runs-on: ${{ fromJson(inputs.runner) }}
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: ${{ inputs.distribution }}
+          java-version: ${{ inputs.java-version }}
+
+      # Set tag version as POM revision
+      - name: Set POM revision
+        if: github.event_name == 'release'
+        run: sed -i -E 's/(<revision>).*(<\/revision>)/\1'${GITHUB_REF#refs/tags/}'\2/g' pom.xml
+
+      # Build Maven files
+      - name: Build with Maven
+        run: ./mvnw package --file pom.xml
+
+      # List contents of working directory
+      - name: List working directory
+        run: find . -path ./.git -prune  -o -print
