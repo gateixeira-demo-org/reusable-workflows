@@ -32,9 +32,6 @@ jobs:
           java-version: ${{ inputs.java-version }}
           cache: maven
 
-      - name: Echo release tag
-        run: echo ${GITHUB_REF#refs/tags/}
-
       # Run Maven unit tests with release tag
       - name: Run tests with Maven
         if: github.event_name == 'release'
