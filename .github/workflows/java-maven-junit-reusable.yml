@@ -32,14 +32,9 @@ jobs:
           java-version: ${{ inputs.java-version }}
           cache: maven
 
-      # Set tag version as POM revision
-      - name: Set POM revision
-        if: github.event_name == 'release'
-        run: sed -i -E 's/(<revision>).*(<\/revision>)/\1'${GITHUB_REF#refs/tags/}'\2/g' pom.xml
-
       # Run Maven unit tests
       - name: Run tests with Maven
-        run: ./mvnw -B test --file pom.xml
+        run: ./mvnw -Drevision=${GITHUB_REF#refs/tags/} -B test --file pom.xml 
 
       # Report test results to GitHub
       - name: Report

@@ -31,14 +31,6 @@ jobs:
           distribution: ${{ inputs.distribution }}
           java-version: ${{ inputs.java-version }}
 
-      # Set tag version as POM revision
-      - name: Set POM revision
-        if: github.event_name == 'release'
-        run: sed -i -E 's/(<revision>).*(<\/revision>)/\1'${GITHUB_REF#refs/tags/}'\2/g' pom.xml
-
-      - name: Cat pom.xml
-        run: cat pom.xml 
-
       # Build Maven files
       - name: Build with Maven
-        run: ./mvnw package --file pom.xml
+        run: ./mvnw package -Drevision=${GITHUB_REF#refs/tags/} --file pom.xml
