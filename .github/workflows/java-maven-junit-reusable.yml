@@ -35,9 +35,15 @@ jobs:
       - name: Echo release tag
         run: echo ${GITHUB_REF#refs/tags/}
 
-      # Run Maven unit tests
+      # Run Maven unit tests with release tag
       - name: Run tests with Maven
+        if: github.event_name == 'release'
         run: ./mvnw -Drevision=${GITHUB_REF#refs/tags/} -B test --file pom.xml 
+
+        # Run Maven unit tests without release tag
+      - name: Run tests with Maven
+        if: github.event_name != 'release'
+        run: ./mvnw -B test --file pom.xml 
 
       # Report test results to GitHub
       - name: Report

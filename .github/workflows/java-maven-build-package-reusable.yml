@@ -31,6 +31,12 @@ jobs:
           distribution: ${{ inputs.distribution }}
           java-version: ${{ inputs.java-version }}
 
-      # Build Maven files
+      # Build Maven files for release
       - name: Build with Maven
+        if: github.event_name == 'release'
         run: ./mvnw package -Drevision=${GITHUB_REF#refs/tags/} --file pom.xml
+
+      # Build Maven files without release
+      - name: Build with Maven
+        if: github.event_name != 'release'
+        run: ./mvnw package --file pom.xml
