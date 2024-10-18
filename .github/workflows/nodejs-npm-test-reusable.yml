@@ -1,0 +1,47 @@
+name: NodeJS npm Test Reusable Workflow
+
+# Trigger this workflow by a caller workflow
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+
+# This workflow runs tests on a NodeJS npm project
+jobs:
+  npm-test:
+    runs-on: ${{ fromJson(inputs.runner) }}
+    
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Run npm tests
+      - name: Run tests
+        run: npm test
+
+      # Report test results to GitHub
+      - name: Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: npm test report
+          path: test-results/*.xml
+          reporter: jest
+          fail-on-error: true
