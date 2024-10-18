@@ -1,0 +1,41 @@
+name: NodeJS Build Package Reusable Workflow
+
+# Trigger this workflow by a caller workflow
+on:
+  workflow_call:
+    inputs:
+      runner:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+
+# This workflow builds a package from a NodeJS project
+jobs:
+  build-package:
+    runs-on: ${{ fromJson(inputs.runner) }}
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+
+      - name: Set Package version
+        if: github.event_name == 'release'
+        run: npm version ${GITHUB_REF#refs/tags/} --no-git-tag-version
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Build npm package for release
+      - name: Build for release
+        run: npm run build
