@@ -9,7 +9,7 @@
 - As a first step the repository code is checked out to the runner using the [Checkout][checkout] action.
 - Java is installed using the [Setup Java JDK][setupjava] action. The `github/setup-java@v4` action is used to set up a Java JDK environment. [Version][version] and [distribution][distribution] can be manually configured, other available parameters can be found in the setup-java repo.
 - If the workflow is triggered by release, the tag belonging to the release is used to set the version of the project inside the `pom.xml` file using the [revision][revision] flag.
-- The [`maven-surefire-plugin`][mavensurefire] Maven [wrapper][wrapper] is used to run the unit tests.
+- The [`maven-surefire-plugin`][mavensurefire] is used to run the unit tests.
 - A result report is generated and used as a gatekeeper for the workflow using the [Test Reporter][testreporter] Action.
   This test report is published in the Action job summary view.
 - Finally a file listing overview of the runner workspace is printed to the Actions workflow log.
@@ -23,4 +23,3 @@
 [distribution]: https://github.com/actions/setup-java#supported-distributions
 [version]: https://github.com/actions/setup-java#supported-version-syntax
 [workflowsyntax]: https://docs.github.com/enterprise-server@latest/actions/using-workflows/workflow-syntax-for-github-actions
-[wrapper]: https://maven.apache.org/wrapper

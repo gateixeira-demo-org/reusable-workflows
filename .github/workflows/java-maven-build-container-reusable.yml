@@ -50,6 +50,3 @@ jobs:
           -Dquarkus.container-image.group=${{ github.repository_owner }} \
           -Dquarkus.container-image.name=${{ env.container_image_name }} \
 
-      # List contents of working directory
-      - name: List working directory
-        run: find . -path ./.git -prune  -o -print
