@@ -18,5 +18,5 @@
 [revision]: https://maven.apache.org/maven-ci-friendly.html
 [distribution]: https://github.com/actions/setup-java#supported-distributions
 [version]: https://github.com/actions/setup-java#supported-version-syntax
-[workflowsyntax]: https://docs.github.com/enterprise-server@latest/actions/using-workflows/workflow-syntax-for-github-actions
+[workflowsyntax]: https://docs.github.com/en/enterprise-cloud@latest/actions/writing-workflows
 [maven]: https://maven.apache.org/
