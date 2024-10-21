@@ -48,5 +48,5 @@ jobs:
         run: |
           docker build -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA:0:7} .
 
-      - name: docker ps
-        run: docker ps
+      - name: docker image
+        run: docker image
