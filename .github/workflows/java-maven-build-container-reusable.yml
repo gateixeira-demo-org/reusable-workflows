@@ -32,20 +32,21 @@ jobs:
           java-version: ${{ inputs.java-version }}
 
       # Set tag version as POM revision
-      - name: Set Artifact name
-        run: artifact_id=$(grep -m 1 '<artifactId>' pom.xml | sed -e 's/<artifactId>\(.*\)<\/artifactId>/\1/')
+      - name: Set Artifact ID
+        id: set-artifact-id
+        run: echo "artifact_id=$(grep -m 1 '<artifactId>' pom.xml | sed -e 's/<artifactId>\(.*\)<\/artifactId>/\1/')" >> "$GITHUB_OUTPUT"
 
       # Build container image for release
       - name: Build container image
         if: github.event_name == 'release'
         run: |
-          docker build --build-arg REVISION=${GITHUB_REF#refs/tags/} -t ${artifact_id}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA:0:7} .
+          docker build --build-arg REVISION=${GITHUB_REF#refs/tags/} -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA:0:7} .
 
       # Build container image without release
       - name: Build container image
         if: github.event_name != 'release'
         run: |
-          docker build -t ${artifact_id}:${GITHUB_SHA:0:7} .
+          docker build -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA:0:7} .
 
       - name: docker ps
         run: docker ps
