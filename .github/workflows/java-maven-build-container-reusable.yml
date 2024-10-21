@@ -40,13 +40,13 @@ jobs:
       - name: Build container image
         if: github.event_name == 'release'
         run: |
-          docker build --build-arg REVISION=${GITHUB_REF#refs/tags/} -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA:0:7} .
+          docker build --build-arg REVISION=${GITHUB_REF#refs/tags/} -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA::7} .
 
       # Build container image without release
       - name: Build container image
         if: github.event_name != 'release'
         run: |
-          docker build -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA:0:7} .
+          docker build -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA::7} .
 
       - name: docker image
         run: docker image
