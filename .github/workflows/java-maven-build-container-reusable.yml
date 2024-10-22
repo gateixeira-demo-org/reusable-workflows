@@ -13,12 +13,20 @@ on:
       java-version:
         required: true
         type: string
+      registry-url:
+        required: true
+        type: string
+      registry-username:
+        required: true
+        type: string
+    secrets:
+      registry-token:
+        required: true
 
 # This worfklow builds a container image from a Java Maven project
 jobs:
   build-container:
     runs-on: ${{ fromJson(inputs.runner) }}
-
     steps:
       # Checkout the repository
       - name: Checkout
@@ -36,14 +44,29 @@ jobs:
         id: set-artifact-id
         run: echo "artifact_id=$(grep -m 1 '<artifactId>' pom.xml | sed -e 's/<artifactId>\(.*\)<\/artifactId>/\1/')" >> "$GITHUB_OUTPUT"
 
-      # Build container image for release
-      - name: Build container image
-        if: github.event_name == 'release'
-        run: |
-          docker build --build-arg REVISION=${GITHUB_REF#refs/tags/} -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA::7} .
+      # Set up Docker Buildx for more comprehensive build options
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      # Build container image without release
-      - name: Build container image
-        if: github.event_name != 'release'
-        run: |
-          docker build -t ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA::7} .
+      # Login to container registry
+      - name: Login to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ inputs.registry-url }}
+          username: ${{ inputs.registry-username }}
+          password: ${{ secrets.registry-token }}
+      
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_SHA::7}
+      
+      - name: Build and Publish
+        if: github.event_name == 'release'
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${GITHUB_SHA::7}
+          build-args: |
+            REVISION==${GITHUB_REF#refs/tags/}
