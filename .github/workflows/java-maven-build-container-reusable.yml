@@ -66,6 +66,8 @@ jobs:
         with:
           push: false
           tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-git-hash.outputs.short_hash }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
       - name: Build and Publish
         if: github.event_name == 'release'
@@ -75,3 +77,5 @@ jobs:
           tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${{ steps.set-git-hash.outputs.short_hash }}
           build-args: |
             REVISION=${GITHUB_REF#refs/tags/}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
