@@ -38,6 +38,7 @@ jobs:
         with:
           distribution: ${{ inputs.distribution }}
           java-version: ${{ inputs.java-version }}
+          cache: maven
 
       # Set tag version as POM revision
       - name: Set Artifact ID
@@ -60,13 +61,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: false
-          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ github.sha }}
+          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ github.sha }}::7
       
       - name: Build and Publish
         if: github.event_name == 'release'
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${{ github.sha }}
+          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${{ github.sha }}::7
           build-args: |
             REVISION==${GITHUB_REF#refs/tags/}
