@@ -49,6 +49,10 @@ jobs:
         id: set-git-hash
         run: echo "short_hash=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
 
+      - name: Set version tag
+        id: set-version-tag
+        run: echo "version_tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
       # Set up Docker Buildx for more comprehensive build options
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -74,8 +78,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${GITHUB_REF#refs/tags/}_${{ steps.set-git-hash.outputs.short_hash }}
+          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-version-tag.outputs.version_tag }}_${{ steps.set-git-hash.outputs.short_hash }}
           build-args: |
-            REVISION=${GITHUB_REF#refs/tags/}
+            REVISION=${{ steps.set-version-tag.outputs.version_tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
