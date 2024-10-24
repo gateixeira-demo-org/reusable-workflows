@@ -51,7 +51,7 @@ jobs:
 
       - name: Set image prefix
         id: set-image-prefix
-        run: echo "image_prefix=ghcr.io/${{ inputs.registry-username }}/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
+        run: echo "image_prefix=${{ inputs.registry-url }}/${{ inputs.registry-username }}/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
 
       # Set up Docker Buildx for more comprehensive build options
       - name: Set up Docker Buildx
