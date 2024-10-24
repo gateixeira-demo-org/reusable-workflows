@@ -49,13 +49,9 @@ jobs:
         id: set-git-hash
         run: echo "short_hash=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
 
-      - name: Set version tag
-        id: set-version-tag
-        run: echo "version_tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-
       - name: Set image prefix
         id: set-image-prefix
-        run: echo "image_prefix=gcr.io/${{ inputs.registry-username }}/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
+        run: echo "image_prefix=ghcr.io/${{ inputs.registry-username }}/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
 
       # Set up Docker Buildx for more comprehensive build options
       - name: Set up Docker Buildx
@@ -76,6 +72,11 @@ jobs:
           tags: ${{ steps.set-image-prefix.outputs.image_prefix }}:${{ steps.set-git-hash.outputs.short_hash }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Set version tag
+        if: github.event_name == 'release'
+        id: set-version-tag
+        run: echo "version_tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
       
       - name: Build and Publish
         if: github.event_name == 'release'
