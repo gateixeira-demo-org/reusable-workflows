@@ -69,7 +69,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: false
-          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-git-hash.outputs.short_hash }}
+          tags: ${{ inputs.registry-url }}/${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-git-hash.outputs.short_hash }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
@@ -78,7 +78,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-version-tag.outputs.version_tag }}_${{ steps.set-git-hash.outputs.short_hash }}
+          tags: ${{ inputs.registry-url }}/${{ steps.set-artifact-id.outputs.artifact_id }}:${{ steps.set-version-tag.outputs.version_tag }}_${{ steps.set-git-hash.outputs.short_hash }}
           build-args: |
             REVISION=${{ steps.set-version-tag.outputs.version_tag }}
           cache-from: type=gha
