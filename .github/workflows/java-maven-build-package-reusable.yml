@@ -30,6 +30,7 @@ jobs:
         with:
           distribution: ${{ inputs.distribution }}
           java-version: ${{ inputs.java-version }}
+          cache: maven
 
       # Build Maven files for release
       - name: Build with Maven
