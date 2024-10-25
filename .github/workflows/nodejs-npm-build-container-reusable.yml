@@ -20,7 +20,7 @@ on:
       registry-token:
         required: true
 
-# This worfklow builds a container image from a Java Maven project
+# This workflow builds a container image from a NodeJS project
 jobs:
   build-container:
     runs-on: ${{ fromJson(inputs.runner) }}
@@ -29,26 +29,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Set up JDK
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: ${{ inputs.distribution }}
-          java-version: ${{ inputs.java-version }}
-          cache: maven
-
-      # Set tag version as POM revision
+      # Set artifact ID from package.json
       - name: Set Artifact ID
         id: set-artifact-id
-        run: echo "artifact_id=$(grep -m 1 '<artifactId>' pom.xml | sed -e 's/<artifactId>\(.*\)<\/artifactId>/\1/' | awk '{$1=$1};1')" >> "$GITHUB_OUTPUT"
+        run: echo "artifact_id=$(jq -r '.name' package.json)" >> "$GITHUB_OUTPUT"
 
+      # Set Git short hash
       - name: Set Git short hash
         id: set-git-hash
         run: echo "short_hash=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
 
+      # Create tag prefix
       - name: Set image prefix
         id: set-image-prefix
-        run: echo "image_prefix=${{ inputs.registry-url }}/${{ github.repository_owner }}/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
+        run: echo "image_prefix=${{ inputs.registry-url }}/$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')/${{ steps.set-artifact-id.outputs.artifact_id }}" >> "$GITHUB_OUTPUT"
 
       # Set up Docker Buildx for more comprehensive build options
       - name: Set up Docker Buildx
@@ -62,6 +56,7 @@ jobs:
           username: ${{ inputs.registry-username }}
           password: ${{ secrets.registry-token }}
       
+      # Build without version tag if not release
       - name: Build
         if: github.event_name != 'release'
         uses: docker/build-push-action@v6
@@ -71,11 +66,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Set version tag
-        if: github.event_name == 'release'
+      # Set version tag if release
+      - name: Set Package version
         id: set-version-tag
-        run: echo "version_tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-      
+        if: github.event_name == 'release'
+        run: npm version ${GITHUB_REF#refs/tags/} --no-git-tag-version
+
+      # Build with version tag and publish if release
       - name: Build and Publish
         if: github.event_name == 'release'
         uses: docker/build-push-action@v6
