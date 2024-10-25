@@ -62,6 +62,28 @@ This repository contains a collection of reusable GitHub Actions workflows desig
         node-version: '19'
   ```
 
+#### NodeJS npm Build Container Reusable Workflow
+
+- **File**: `nodejs-npm-build-container-reusable.yml`
+- **Description**: This workflow builds a container using Docker from an NPM-based Node.js project
+- **Usage**:
+  ```yaml
+    # Build a container image with Docker
+  build-container:
+    permissions:
+      contents: read
+      packages: write
+
+    uses: ./.github/workflows/nodejs-npm-build-container-reusable.yml@main
+    with:
+      runner: ubuntu-latest
+      node-version: '19'
+      registry-url: ghcr.io
+      registry-username: ${{ github.actor }}
+    secrets: 
+      registry-token: ${{ secrets.GITHUB_TOKEN }}
+  ```
+
 ## How to Use a Reusable Workflow
 
 To use any of these reusable workflows in your project, reference the appropriate workflow file in your GitHub Actions configuration file (`.github/workflows/your-workflow.yml`). Make sure to specify the required inputs as shown in the examples above.
