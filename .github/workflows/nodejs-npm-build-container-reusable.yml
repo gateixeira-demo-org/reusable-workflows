@@ -67,10 +67,10 @@ jobs:
           cache-to: type=gha,mode=max
 
       # Set version tag if release
-      - name: Set Package version
+      - name: Bump Package version
         id: set-version-tag
         if: github.event_name == 'release'
-        run: npm version ${GITHUB_REF#refs/tags/} --no-git-tag-version
+        run: echo "version_tag=$(npm version ${GITHUB_REF#refs/tags/} --no-git-tag-version | cut -c 2-)" >> "$GITHUB_OUTPUT"
 
       # Build with version tag and publish if release
       - name: Build and Publish
